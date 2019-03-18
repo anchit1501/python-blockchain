@@ -35,13 +35,36 @@ def print_blockchain_elements():
     for block in blockchain:
         print('Outputting Block')
         print(block)
+    else:
+        print('-'*50)
+
+def verify_chain():
+    block_index = 0
+    is_valid = True
+    for block in blockchain:
+        if block_index == 0:
+            block_index += 1
+            continue
+
+        if block[0] == blockchain[block_index - 1]:
+            is_valid = True
+        else:
+            is_valid = False
+            break
+        block_index +=1
+    return is_valid
+            
+waiting_for_input = True
+
 
 # While Loop
-while True:
+while waiting_for_input:
     print('Please Choose')
     print('1. Add new trnsaction value')
     print('2. Output the blockchain blocks')
-    print('3. Quit')
+    print('3. Manipulate Blockchain')
+    print('4. Quit')
+    
     user_choice=get_user_choice()
     if user_choice == '1':
         tx_amount=get_transaction_value()
@@ -51,16 +74,30 @@ while True:
         print_blockchain_elements()
 
     elif user_choice == '3':
+        if len(blockchain) >= 1:
+            blockchain[0] = [2]
+
+    elif user_choice == '4':
         # Option 1
-        break
-        # Option 2
-        # Skips the code to restart the loop
+        # break
+
         # continue
+        # Skips the code to restart the loop
+        
+        # Option 2
+        waiting_for_input = False
 
 
     else:
         print('Invalid Input, Please pick value from list')
-    print('Choice Registered!!!!')
+
+    if not verify_chain():
+        print('Invalid Blockchain')
+        break
+    # print('Choice Registered!!!!')
+#else with loop is executed after loop is exited
+else:
+    print('User Exited!!')
        
 print('Done!')
 
