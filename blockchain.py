@@ -1,3 +1,4 @@
+import functools
 # Initializing our (empty) blockchain list
 MINING_REWARD = 10
 
@@ -20,16 +21,19 @@ def hash_block(block):
 def get_balance(participant):
     tx_sender = [[tx['amount'] for tx in block['transactions'] if tx['sender'] == participant] for block in blockchain]
     open_tx_sender = [tx['amount'] for tx in open_transactions if tx['sender'] == participant]
+
     tx_sender.append(open_tx_sender)
-    amount_sent = 0
-    for tx in tx_sender:
-        if len(tx) > 0:
-            amount_sent += tx[0]
+    print(tx_sender)
+    amount_sent = functools.reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_sender, 0)
+    # amount_sent = 0
+    # for tx in tx_sender:
+    #     if len(tx) > 0:
+    #         amount_sent += tx[0]
     tx_recipient = [[tx['amount'] for tx in block['transactions'] if tx['recipient'] == participant] for block in blockchain]
-    amount_received = 0
-    for tx in tx_recipient:
-        if len(tx) > 0:
-            amount_received += tx[0]
+    amount_received =  functools.reduce(lambda tx_sum, tx_amt: tx_sum + tx_amt[0] if len(tx_amt)>0 else 0, tx_recipient, 0)
+    # for tx in tx_recipient:
+    #     if len(tx) > 0:
+    #         amount_received += tx[0]
     return amount_received - amount_sent
 
 
@@ -122,6 +126,9 @@ def verify_chain():
             return False
     return True
 
+def verify_transactions():
+    return all ([verify_transaction(tx) for tx in open_transactions])
+
 
 waiting_for_input = True
 
@@ -133,8 +140,9 @@ while waiting_for_input:
     print('2: Mine a new block')
     print('3: Output the blockchain blocks')
     print('4: Manipulate the chain')
-    print('5. Ouput Participants')
-    print('6: Quit')
+    print('5: Check transaction Validity')
+    print('6. Ouput Participants')
+    print('7: Quit')
     user_choice = get_user_choice()
     if user_choice == '1':
         tx_data = get_transaction_value()
@@ -153,6 +161,11 @@ while waiting_for_input:
     elif user_choice == '4':
         print(participants)
     elif user_choice == '5':
+        if verify_transactions():
+            print('All transactions are valid')
+        else:
+            print('There are invalid transactions')
+    elif user_choice == '6':
         # Make sure that you don't try to "hack" the blockchain if it's empty
         if len(blockchain) >= 1:
             blockchain[0] = {
@@ -160,7 +173,7 @@ while waiting_for_input:
                 'index': 0,
                 'transactions': [{'sender': 'Chris', 'recipient': 'Max', 'amount': 100.0}]
             }
-    elif user_choice == '6':
+    elif user_choice == '7':
         # This will lead to the loop to exist because it's running condition becomes False
         waiting_for_input = False
     else:
@@ -170,7 +183,7 @@ while waiting_for_input:
         print('Invalid blockchain!')
         # Break out of the loop
         break
-    print(get_balance('Max'))
+    print('Balance of {}: {:6.2f}'.format('Max', get_balance('Max')))
 else:
     print('User left!')
 
